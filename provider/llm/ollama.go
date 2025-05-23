@@ -10,52 +10,47 @@ import (
 	"strings"
 )
 
-const OllamaDefaultBaseURL = "http://localhost:11434/v1"
+const DefaultBaseURLOllama = "http://localhost:11434/v1"
 
 type Ollama struct {
-	client  *http.Client
-	baseURL string
-	path    string
-	model   OllamaModel
-
-	url string `exhaustruct:"optional"`
+	*BaseConfig
+	model OllamaModel
 }
 
 type OllamaOption func(*Ollama)
 
-func OllamaHTTPClient(client *http.Client) OllamaOption {
-	return func(o *Ollama) {
-		o.client = client
-	}
-}
-
-func OllamaBaseURL(baseURL string) OllamaOption {
-	return func(o *Ollama) {
-		o.baseURL = baseURL
-	}
-}
-
-func OllamaCompletionsPath(path string) OllamaOption {
-	return func(o *Ollama) {
-		o.path = path
-	}
-}
-
 type OllamaModel string
 
-func NewOllama(model OllamaModel, options ...OllamaOption) *Ollama {
+type OllamaConfig struct {
+	Base   []BaseConfigOption
+	Ollama []OllamaOption
+}
+
+func NewOllama(model OllamaModel) *Ollama {
 	ollama := &Ollama{
-		client:  NewDefaultHTTPClient(),
-		baseURL: OllamaDefaultBaseURL,
-		path:    DefaultChatCompletionsPath,
-		model:   model,
+		BaseConfig: NewBaseConfig(BaseURL(DefaultBaseURLOllama)),
+		model:      model,
 	}
 
-	for _, opt := range options {
-		opt(ollama)
+	return ollama
+}
+
+func NewOllamaWithConfig(model OllamaModel, cfg *OllamaConfig) *Ollama {
+	baseConfigOpts := []BaseConfigOption{BaseURL(DefaultBaseURLOllama)}
+	if cfg != nil {
+		baseConfigOpts = append(baseConfigOpts, cfg.Base...)
 	}
 
-	ollama.url = BuildChatCompletionsURL(ollama.baseURL, ollama.path)
+	ollama := &Ollama{
+		BaseConfig: NewBaseConfig(baseConfigOpts...),
+		model:      model,
+	}
+
+	if cfg != nil {
+		for _, opt := range cfg.Ollama {
+			opt(ollama)
+		}
+	}
 
 	return ollama
 }
