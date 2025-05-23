@@ -1,4 +1,4 @@
-package ollama
+package llm
 
 import (
 	"context"
@@ -8,48 +8,46 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/DeluxeOwl/aigo/provider/ai"
 )
 
-const DefaultBaseURL = "http://localhost:11434/v1"
+const OllamaDefaultBaseURL = "http://localhost:11434/v1"
 
 type Ollama struct {
 	client  *http.Client
 	baseURL string
 	path    string
-	model   Model
+	model   OllamaModel
 
 	url string `exhaustruct:"optional"`
 }
 
-type Option func(*Ollama)
+type OllamaOption func(*Ollama)
 
-func WithHTTPClient(client *http.Client) Option {
+func OllamaHTTPClient(client *http.Client) OllamaOption {
 	return func(o *Ollama) {
 		o.client = client
 	}
 }
 
-func WithBaseURL(baseURL string) Option {
+func OllamaBaseURL(baseURL string) OllamaOption {
 	return func(o *Ollama) {
 		o.baseURL = baseURL
 	}
 }
 
-func WithCompletionsPath(path string) Option {
+func OllamaCompletionsPath(path string) OllamaOption {
 	return func(o *Ollama) {
 		o.path = path
 	}
 }
 
-type Model string
+type OllamaModel string
 
-func New(model Model, options ...Option) *Ollama {
+func NewOllama(model OllamaModel, options ...OllamaOption) *Ollama {
 	ollama := &Ollama{
-		client:  ai.NewDefaultHTTPClient(),
-		baseURL: DefaultBaseURL,
-		path:    ai.DefaultChatCompletionsPath,
+		client:  NewDefaultHTTPClient(),
+		baseURL: OllamaDefaultBaseURL,
+		path:    DefaultChatCompletionsPath,
 		model:   model,
 	}
 
@@ -57,7 +55,7 @@ func New(model Model, options ...Option) *Ollama {
 		opt(ollama)
 	}
 
-	ollama.url = ai.BuildChatCompletionsURL(ollama.baseURL, ollama.path)
+	ollama.url = BuildChatCompletionsURL(ollama.baseURL, ollama.path)
 
 	return ollama
 }
@@ -93,7 +91,7 @@ func (o *Ollama) Ask(ctx context.Context, message string) (string, error) {
 		return "", fmt.Errorf("ask: %w", err)
 	}
 
-	var u ai.Response
+	var u Response
 	err = json.Unmarshal(b, &u)
 	if err != nil {
 		return "", fmt.Errorf("ask: %w", err)

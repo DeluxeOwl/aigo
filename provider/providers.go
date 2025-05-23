@@ -1,9 +1,7 @@
 package provider
 
-import (
-	"github.com/DeluxeOwl/aigo/provider/ollama"
-)
+import "github.com/DeluxeOwl/aigo/provider/llm"
 
-func NewProviderOllama(model ollama.Model, options ...ollama.Option) *ollama.Ollama {
-	return ollama.New(model, options...)
+func NewOllama(model llm.OllamaModel, options ...llm.OllamaOption) *llm.Ollama {
+	return llm.NewOllama(model, options...)
 }

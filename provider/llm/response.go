@@ -1,4 +1,4 @@
-package ai
+package llm
 
 type Response struct {
 	ID                string   `json:"id"`
