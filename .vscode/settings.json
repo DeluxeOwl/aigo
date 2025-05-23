@@ -37,7 +37,7 @@
     //     "--fast",
     // ],
     // Note: doesnt work with vscode with workspace
-    "go.lintOnSave": "file",
+    "go.lintOnSave": "workspace",
     "go.formatTool": "custom",
     "go.formatFlags": [
         "fmt",
