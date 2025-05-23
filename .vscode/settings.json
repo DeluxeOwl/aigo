@@ -32,9 +32,12 @@
     "go.useLanguageServer": true,
     // Backend configuration
     "go.lintTool": "golangci-lint",
-    "go.lintFlags": [
-        "--fast",
-    ],
+    // Note: --fast disables some linters, like the exhaustive one
+    // "go.lintFlags": [
+    //     "--fast",
+    // ],
+    // Note: doesnt work with vscode with workspace
+    "go.lintOnSave": "file",
     "go.alternateTools": {
         // Note: really important that the relative-path-mode is wd in .golangci.yaml
         "golangci-lint": "${workspaceFolder}/.devbox/nix/profile/default/bin/golangci-lint",
@@ -63,22 +66,27 @@
     "oxc.path.server": "${workspaceFolder}/client/node_modules/oxlint/bin/oxc_language_server",
     "[javascript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        // Note: this prevents the weird discrepancy with the extension
         "editor.insertSpaces": false
     },
     "[javascriptreact]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        // Note: this prevents the weird discrepancy with the extension
         "editor.insertSpaces": false
     },
     "[typescript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        // Note: this prevents the weird discrepancy with the extension
         "editor.insertSpaces": false
     },
     "[typescriptreact]": {
+        // "editor.defaultFormatter": "dbaeumer.vscode-eslint"
         "editor.defaultFormatter": "dbaeumer.vscode-eslint",
         "editor.insertSpaces": false
     },
     "[mjs]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        // Note: this prevents the weird discrepancy with the extension
         "editor.insertSpaces": false
     },
     "tailwindCSS.experimental.classRegex": [

@@ -1,9 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.2/.schema/devbox.schema.json",
   "packages": [
-    "golangci-lint@1.64.8",
     "go@latest",
-    "gopls@latest"
+    "gopls@latest",
+    "golangci-lint@latest"
   ],
   "shell": {
     "init_hook": [
