@@ -13,7 +13,7 @@ import (
 const DefaultBaseURLOllama = "http://localhost:11434/v1"
 
 type Ollama struct {
-	*BaseConfig
+	*Base
 	model OllamaModel
 }
 
@@ -22,28 +22,28 @@ type OllamaOption func(*Ollama)
 type OllamaModel string
 
 type OllamaConfig struct {
-	Base   []BaseConfigOption
+	Base   []BaseOption
 	Ollama []OllamaOption
 }
 
 func NewOllama(model OllamaModel) *Ollama {
 	ollama := &Ollama{
-		BaseConfig: NewBaseConfig(BaseURL(DefaultBaseURLOllama)),
-		model:      model,
+		Base:  NewBaseConfig(BaseURL(DefaultBaseURLOllama)),
+		model: model,
 	}
 
 	return ollama
 }
 
 func NewOllamaWithConfig(model OllamaModel, cfg *OllamaConfig) *Ollama {
-	baseConfigOpts := []BaseConfigOption{BaseURL(DefaultBaseURLOllama)}
+	baseConfigOpts := []BaseOption{BaseURL(DefaultBaseURLOllama)}
 	if cfg != nil {
 		baseConfigOpts = append(baseConfigOpts, cfg.Base...)
 	}
 
 	ollama := &Ollama{
-		BaseConfig: NewBaseConfig(baseConfigOpts...),
-		model:      model,
+		Base:  NewBaseConfig(baseConfigOpts...),
+		model: model,
 	}
 
 	if cfg != nil {

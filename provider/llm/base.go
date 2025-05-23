@@ -2,35 +2,35 @@ package llm
 
 import "net/http"
 
-type BaseConfig struct {
+type Base struct {
 	client  *http.Client
 	url     string `exhaustruct:"optional"`
 	baseURL string `exhaustruct:"optional"`
 	path    string `exhaustruct:"optional"`
 }
 
-type BaseConfigOption func(*BaseConfig)
+type BaseOption func(*Base)
 
-func HTTPClient(client *http.Client) BaseConfigOption {
-	return func(c *BaseConfig) {
+func HTTPClient(client *http.Client) BaseOption {
+	return func(c *Base) {
 		c.client = client
 	}
 }
 
-func BaseURL(baseURL string) BaseConfigOption {
-	return func(c *BaseConfig) {
+func BaseURL(baseURL string) BaseOption {
+	return func(c *Base) {
 		c.baseURL = baseURL
 	}
 }
 
-func CompletionsPath(path string) BaseConfigOption {
-	return func(c *BaseConfig) {
+func CompletionsPath(path string) BaseOption {
+	return func(c *Base) {
 		c.path = path
 	}
 }
 
-func NewBaseConfig(options ...BaseConfigOption) *BaseConfig {
-	c := &BaseConfig{
+func NewBaseConfig(options ...BaseOption) *Base {
+	c := &Base{
 		client: NewDefaultHTTPClient(),
 		path:   DefaultChatCompletionsPath,
 	}
