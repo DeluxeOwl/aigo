@@ -30,7 +30,7 @@ func TestOllama(t *testing.T) {
 	req, err := http.NewRequestWithContext(t.Context(), http.MethodPost, url, strings.NewReader(`
 {
 	"model": "qwen3:0.6B",
-	"stream": false,
+	"stream": true,
 	"messages": [
 		{
 			"role": "system",
@@ -38,9 +38,35 @@ func TestOllama(t *testing.T) {
 		},
 		{
 			"role": "user",
-			"content": "Hello!"
+			"content": "What's the weather like in London?"
 		}
-	]
+	],
+	"response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "weather",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "City or location name"
+          },
+          "temperature": {
+            "type": "number",
+            "description": "Temperature in Celsius"
+          },
+          "conditions": {
+            "type": "string",
+            "description": "Weather conditions description"
+          }
+        },
+        "required": ["location", "temperature", "conditions"],
+        "additionalProperties": false
+      }
+    }
+  }
 }`))
 	require.NoError(t, err)
 

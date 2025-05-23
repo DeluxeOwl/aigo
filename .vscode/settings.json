@@ -38,7 +38,13 @@
     // ],
     // Note: doesnt work with vscode with workspace
     "go.lintOnSave": "file",
+    "go.formatTool": "custom",
+    "go.formatFlags": [
+        "fmt",
+        "--stdin"
+    ],
     "go.alternateTools": {
+        "customFormatter": "${workspaceFolder}/.devbox/nix/profile/default/bin/golangci-lint",
         // Note: really important that the relative-path-mode is wd in .golangci.yaml
         "golangci-lint": "${workspaceFolder}/.devbox/nix/profile/default/bin/golangci-lint",
         "go": "${workspaceFolder}/.devbox/nix/profile/default/bin/go",
