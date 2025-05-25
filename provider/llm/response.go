@@ -1,5 +1,10 @@
 package llm
 
+type Request struct {
+	Model    string    `json:"model"`
+	Messages []Message `json:"messages"`
+}
+
 type Response struct {
 	ID                string   `json:"id"`
 	Object            string   `json:"object"`
@@ -16,9 +21,17 @@ type Choice struct {
 	FinishReason string  `json:"finish_reason"`
 }
 
+type MessageRole string
+
+const (
+	MessageRoleUser      MessageRole = "user"
+	MessageRoleAssistant MessageRole = "assistant"
+	MessageRoleSystem    MessageRole = "system"
+)
+
 type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role    MessageRole `json:"role"`
+	Content string      `json:"content"`
 }
 
 type Usage struct {

@@ -1,13 +1,15 @@
 package llm
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+
+	"github.com/DeluxeOwl/aigo"
 )
 
 const DefaultBaseURLOllama = "http://localhost:11434/v1"
@@ -56,45 +58,50 @@ func NewOllamaWithConfig(model OllamaModel, cfg *OllamaConfig) *Ollama {
 }
 
 // TODO: errors
-func (o *Ollama) Ask(ctx context.Context, message string) (string, error) {
-	body := fmt.Sprintf(`
-{
-	"model": "%s",
-	"messages": [
-		{
-			"role": "user",
-			"content": "%s"
-		}
-	]
-}
-`, o.model, message)
+func (o *Ollama) Ask(ctx context.Context, message string) (*aigo.AskResponse, error) {
+	body := Request{
+		Model: string(o.model),
+		Messages: []Message{
+			{
+				Role:    MessageRoleUser,
+				Content: message,
+			},
+		},
+	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, o.url, strings.NewReader(body))
+	jsonb, err := json.Marshal(body)
 	if err != nil {
-		return "", fmt.Errorf("ask: %w", err)
+		return nil, fmt.Errorf("ask: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, o.url, bytes.NewBuffer(jsonb))
+	if err != nil {
+		return nil, fmt.Errorf("ask: %w", err)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := o.client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("ask: %w", err)
+		return nil, fmt.Errorf("ask: %w", err)
 	}
 	defer resp.Body.Close()
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("ask: %w", err)
+		return nil, fmt.Errorf("ask: %w", err)
 	}
 
 	var u Response
 	err = json.Unmarshal(b, &u)
 	if err != nil {
-		return "", fmt.Errorf("ask: %w", err)
+		return nil, fmt.Errorf("ask: %w", err)
 	}
 
 	if len(u.Choices) == 0 {
-		return "", errors.New("ask: empty response")
+		return nil, errors.New("ask: empty response")
 	}
 
-	return u.Choices[0].Message.Content, nil
+	return &aigo.AskResponse{
+		Text: u.Choices[0].Message.Content,
+	}, nil
 }

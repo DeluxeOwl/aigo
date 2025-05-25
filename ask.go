@@ -5,7 +5,7 @@ import (
 )
 
 type Asker interface {
-	Ask(ctx context.Context, message string) (string, error)
+	Ask(ctx context.Context, message string) (*AskResponse, error)
 }
 
 type AskOptions struct {
@@ -29,21 +29,25 @@ func (f BeforeAsk) BeforeAsk(ctx context.Context, options *AskOptions) error {
 }
 
 type AfterAsker interface {
-	AfterAsk(ctx context.Context, res string, err error) (string, error)
+	AfterAsk(ctx context.Context, res *AskResponse, err error) (*AskResponse, error)
 }
-type AfterAsk func(ctx context.Context, res string, err error) (string, error)
+type AfterAsk func(ctx context.Context, res *AskResponse, err error) (*AskResponse, error)
 
-func (f AfterAsk) AfterAsk(ctx context.Context, response string, err error) (string, error) {
-	return f(ctx, response, err)
+func (f AfterAsk) AfterAsk(ctx context.Context, res *AskResponse, err error) (*AskResponse, error) {
+	return f(ctx, res, err)
+}
+
+type AskResponse struct {
+	Text string `json:"text"`
 }
 
 // TODO: what about hooks that always run?
-func Ask(ctx context.Context, options *AskOptions) (string, error) {
+func Ask(ctx context.Context, options *AskOptions) (*AskResponse, error) {
 	if options.Hooks != nil && len(options.Hooks.BeforeAsk) > 0 {
 		for _, h := range options.Hooks.BeforeAsk {
 			err := h.BeforeAsk(ctx, options)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 		}
 	}

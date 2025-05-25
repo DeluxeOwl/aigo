@@ -24,8 +24,9 @@ func TestOllama(t *testing.T) {
 				}),
 			},
 			AfterAsk: []aigo.AfterAsker{
-				aigo.AfterAsk(func(_ context.Context, s string, err error) (string, error) {
-					return strings.ToUpper(s), err
+				aigo.AfterAsk(func(_ context.Context, res *aigo.AskResponse, err error) (*aigo.AskResponse, error) {
+					res.Text = strings.ToUpper(res.Text)
+					return res, err
 				}),
 			},
 		},
