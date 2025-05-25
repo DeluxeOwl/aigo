@@ -14,6 +14,7 @@ import (
 
 const DefaultBaseURLOllama = "http://localhost:11434/v1"
 
+// TODO: Technically, any OpenAI compatible would work
 type Ollama struct {
 	*Base
 	model OllamaModel
