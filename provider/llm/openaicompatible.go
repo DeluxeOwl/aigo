@@ -52,10 +52,9 @@ func (o *OpenAICompatible) GenText(ctx context.Context, message string) (*aigo.G
 	body := schema.Request{
 		Model: string(o.model),
 		Messages: []schema.Message{
-			{
-				Role:    schema.MessageRoleUser,
-				Content: message,
-			},
+			schema.NewUserMessage([]schema.ContentPartUser{
+				schema.NewTextPart(message),
+			}),
 		},
 	}
 
@@ -91,7 +90,17 @@ func (o *OpenAICompatible) GenText(ctx context.Context, message string) (*aigo.G
 		return nil, errors.New("gen text: empty response")
 	}
 
+	assistantMessage, ok := u.Choices[0].Message.(*schema.AssistantMessage)
+	if !ok {
+		return nil, errors.New("gen text: missing assistant message")
+	}
+
+	text, ok := assistantMessage.Content.(schema.StringPart)
+	if !ok {
+		return nil, errors.New("gen text: missing assistant string")
+	}
+
 	return &aigo.GenTextResponse{
-		Text: u.Choices[0].Message.Content,
+		Text: text.String(),
 	}, nil
 }
