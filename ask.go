@@ -4,59 +4,58 @@ import (
 	"context"
 )
 
-type Asker interface {
-	Ask(ctx context.Context, message string) (*AskResponse, error)
+type GenTexter interface {
+	GenText(ctx context.Context, message string) (*GenTextResponse, error)
 }
 
-type AskOptions struct {
-	Provider Asker
+type GenTextOptions struct {
+	Provider GenTexter
 	Message  string
-	Hooks    *AskHooks `exhaustruct:"optional"`
+	Hooks    *GenTextHooks `exhaustruct:"optional"`
 }
 
-type AskHooks struct {
-	BeforeAsk []BeforeAsker `exhaustruct:"optional"`
-	AfterAsk  []AfterAsker  `exhaustruct:"optional"`
+type GenTextHooks struct {
+	BeforeGenText []BeforeGenTexter `exhaustruct:"optional"`
+	AfterGenText  []AfterGenTexter  `exhaustruct:"optional"`
 }
 
-type BeforeAsker interface {
-	BeforeAsk(ctx context.Context, options *AskOptions) error
+type BeforeGenTexter interface {
+	BeforeGenText(ctx context.Context, options *GenTextOptions) error
 }
-type BeforeAsk func(ctx context.Context, options *AskOptions) error
+type BeforeGenText func(ctx context.Context, options *GenTextOptions) error
 
-func (f BeforeAsk) BeforeAsk(ctx context.Context, options *AskOptions) error {
+func (f BeforeGenText) BeforeGenText(ctx context.Context, options *GenTextOptions) error {
 	return f(ctx, options)
 }
 
-type AfterAsker interface {
-	AfterAsk(ctx context.Context, res *AskResponse, err error) (*AskResponse, error)
+type AfterGenTexter interface {
+	AfterGenText(ctx context.Context, res *GenTextResponse, err error) (*GenTextResponse, error)
 }
-type AfterAsk func(ctx context.Context, res *AskResponse, err error) (*AskResponse, error)
+type AfterGenText func(ctx context.Context, res *GenTextResponse, err error) (*GenTextResponse, error)
 
-func (f AfterAsk) AfterAsk(ctx context.Context, res *AskResponse, err error) (*AskResponse, error) {
+func (f AfterGenText) AfterGenText(ctx context.Context, res *GenTextResponse, err error) (*GenTextResponse, error) {
 	return f(ctx, res, err)
 }
 
-type AskResponse struct {
+type GenTextResponse struct {
 	Text string `json:"text"`
 }
 
-// TODO: what about hooks that always run?
-func Ask(ctx context.Context, options *AskOptions) (*AskResponse, error) {
-	if options.Hooks != nil && len(options.Hooks.BeforeAsk) > 0 {
-		for _, h := range options.Hooks.BeforeAsk {
-			err := h.BeforeAsk(ctx, options)
+func GenText(ctx context.Context, options *GenTextOptions) (*GenTextResponse, error) {
+	if options.Hooks != nil && len(options.Hooks.BeforeGenText) > 0 {
+		for _, h := range options.Hooks.BeforeGenText {
+			err := h.BeforeGenText(ctx, options)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	res, err := options.Provider.Ask(ctx, options.Message)
+	res, err := options.Provider.GenText(ctx, options.Message)
 
-	if options.Hooks != nil && len(options.Hooks.AfterAsk) > 0 {
-		for _, h := range options.Hooks.AfterAsk {
-			res, err = h.AfterAsk(ctx, res, err)
+	if options.Hooks != nil && len(options.Hooks.AfterGenText) > 0 {
+		for _, h := range options.Hooks.AfterGenText {
+			res, err = h.AfterGenText(ctx, res, err)
 		}
 	}
 
