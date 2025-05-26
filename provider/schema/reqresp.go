@@ -1,5 +1,6 @@
 package schema
 
+// TODO: maybe separate dtos from domain model
 type Request struct {
 	Model    string    `json:"model"`
 	Messages []Message `json:"messages"`
@@ -13,6 +14,7 @@ type Response struct {
 	SystemFingerprint string   `json:"system_fingerprint"`
 	Choices           []Choice `json:"choices"`
 	Usage             Usage    `json:"usage"`
+	Detail            string   `json:"detail"`
 }
 
 type Choice struct {

@@ -2,22 +2,32 @@ package aigo_test
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/DeluxeOwl/aigo"
 	"github.com/DeluxeOwl/aigo/provider"
+	"github.com/DeluxeOwl/aigo/provider/llm"
 	"github.com/DeluxeOwl/aigo/provider/schema"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: models endpoint
 func TestOllama(t *testing.T) {
 	ctx := t.Context()
 
 	resp, err := aigo.GenText(ctx, &aigo.GenTextOptions{
-		Provider: provider.NewOllama("qwen3:0.6B"),
+		Provider: provider.NewOpenAICompatibleWithConfig("google/gemini-2.5-flash-preview-05-20", llm.OpenAICompatibleConfig{
+			Base: []llm.BaseOption{
+				llm.APIBearerKey(os.Getenv("OPENWEB_UI_KEY")),
+				llm.BaseURL("http://localhost:3000"),
+				llm.CompletionsPath("/api/chat/completions"),
+			},
+		}),
 		Messages: []schema.Message{
-			schema.NewSystemMessage("TALK LIKE A PIRATE WITH EMOJIS"),
+			schema.NewSystemMessage("TALK LIKE A PIRATE WITH EMOJIS, also, answer in 100 words"),
 			schema.NewUserMessage([]schema.ContentPartUser{
 				schema.NewTextPart("/no_think What can you tell me about a fox?"),
 			}),

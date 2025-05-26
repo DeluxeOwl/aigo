@@ -13,7 +13,8 @@ const (
 
 func NewDefaultHTTPClient() *http.Client {
 	return &http.Client{
-		Timeout: DefaultHTTPTimeout,
+		Timeout:   DefaultHTTPTimeout,
+		Transport: http.DefaultTransport,
 	}
 }
 

@@ -23,8 +23,8 @@ type OpenAICompatibleOption func(*OpenAICompatible)
 type OpenAICompatibleModel string
 
 type OpenAICompatibleConfig struct {
-	Base             []BaseOption
-	OpenAICompatible []OpenAICompatibleOption
+	Base             []BaseOption             `exhaustruct:"optional"`
+	OpenAICompatible []OpenAICompatibleOption `exhaustruct:"optional"`
 }
 
 func NewOpenAICompatibleWithConfig(model OpenAICompatibleModel, cfg *OpenAICompatibleConfig) *OpenAICompatible {
@@ -64,7 +64,6 @@ func (o *OpenAICompatible) GenText(ctx context.Context, messages []schema.Messag
 		return nil, fmt.Errorf("gen text: %w", err)
 	}
 
-	req.Header.Add("Content-Type", "application/json")
 	resp, err := o.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("gen text: %w", err)
@@ -83,7 +82,7 @@ func (o *OpenAICompatible) GenText(ctx context.Context, messages []schema.Messag
 	}
 
 	if len(u.Choices) == 0 {
-		return nil, errors.New("gen text: empty response")
+		return nil, errors.New("gen text: empty response: " + u.Detail)
 	}
 
 	assistantMessage, ok := u.Choices[0].Message.(*schema.AssistantMessage)
