@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/DeluxeOwl/aigo"
+	"github.com/DeluxeOwl/aigo/provider/schema"
 )
 
 type OpenAICompatible struct {
@@ -48,11 +49,11 @@ func NewOpenAICompatibleWithConfig(model OpenAICompatibleModel, cfg *OpenAICompa
 
 // TODO: errors
 func (o *OpenAICompatible) GenText(ctx context.Context, message string) (*aigo.GenTextResponse, error) {
-	body := Request{
+	body := schema.Request{
 		Model: string(o.model),
-		Messages: []Message{
+		Messages: []schema.Message{
 			{
-				Role:    MessageRoleUser,
+				Role:    schema.MessageRoleUser,
 				Content: message,
 			},
 		},
@@ -80,7 +81,7 @@ func (o *OpenAICompatible) GenText(ctx context.Context, message string) (*aigo.G
 		return nil, fmt.Errorf("gen text: %w", err)
 	}
 
-	var u Response
+	var u schema.Response
 	err = json.Unmarshal(b, &u)
 	if err != nil {
 		return nil, fmt.Errorf("gen text: %w", err)

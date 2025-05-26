@@ -1,4 +1,4 @@
-package llm
+package schema
 
 type Request struct {
 	Model    string    `json:"model"`

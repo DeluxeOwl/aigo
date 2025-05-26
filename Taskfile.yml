@@ -1,0 +1,5 @@
+version: "3"
+
+tasks:
+  lint:
+    cmd: golangci-lint run --fix .
