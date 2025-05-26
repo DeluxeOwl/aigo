@@ -8,56 +8,45 @@ type GenTexter interface {
 	GenText(ctx context.Context, message string) (*GenTextResponse, error)
 }
 
-type GenTextOptions struct {
-	Provider GenTexter
-	Message  string
-	Hooks    *GenTextHooks `exhaustruct:"optional"`
-}
-
-type GenTextHooks struct {
-	BeforeGenText []BeforeGenTexter `exhaustruct:"optional"`
-	AfterGenText  []AfterGenTexter  `exhaustruct:"optional"`
-}
-
-type BeforeGenTexter interface {
-	BeforeGenText(ctx context.Context, options *GenTextOptions) error
-}
-type BeforeGenText func(ctx context.Context, options *GenTextOptions) error
-
-func (f BeforeGenText) BeforeGenText(ctx context.Context, options *GenTextOptions) error {
-	return f(ctx, options)
-}
-
-type AfterGenTexter interface {
-	AfterGenText(ctx context.Context, res *GenTextResponse, err error) (*GenTextResponse, error)
-}
-type AfterGenText func(ctx context.Context, res *GenTextResponse, err error) (*GenTextResponse, error)
-
-func (f AfterGenText) AfterGenText(ctx context.Context, res *GenTextResponse, err error) (*GenTextResponse, error) {
-	return f(ctx, res, err)
-}
-
 type GenTextResponse struct {
 	Text string `json:"text"`
 }
 
+type GenTextNextFn func(ctx context.Context, options *GenTextOptions) (*GenTextResponse, error)
+
+type GenTextMiddleware interface {
+	Process(ctx context.Context, options *GenTextOptions, next GenTextNextFn) (*GenTextResponse, error)
+}
+
+type GenTextMiddlewareFunc func(ctx context.Context, options *GenTextOptions, next GenTextNextFn) (*GenTextResponse, error)
+
+func (f GenTextMiddlewareFunc) Process(ctx context.Context, options *GenTextOptions, next GenTextNextFn) (*GenTextResponse, error) {
+	return f(ctx, options, next)
+}
+
+type GenTextOptions struct {
+	Provider   GenTexter
+	Message    string
+	Middleware []GenTextMiddleware `exhaustruct:"optional"`
+}
+
 func GenText(ctx context.Context, options *GenTextOptions) (*GenTextResponse, error) {
-	if options.Hooks != nil && len(options.Hooks.BeforeGenText) > 0 {
-		for _, h := range options.Hooks.BeforeGenText {
-			err := h.BeforeGenText(ctx, options)
-			if err != nil {
-				return nil, err
+	coreOperation := func(currentCtx context.Context, currentOpts *GenTextOptions) (*GenTextResponse, error) {
+		return currentOpts.Provider.GenText(currentCtx, currentOpts.Message)
+	}
+
+	chainedHandler := GenTextNextFn(coreOperation)
+
+	if options.Middleware != nil {
+		for i := len(options.Middleware) - 1; i >= 0; i-- {
+			mw := options.Middleware[i]
+			nextInChain := chainedHandler
+
+			chainedHandler = func(c context.Context, o *GenTextOptions) (*GenTextResponse, error) {
+				return mw.Process(c, o, nextInChain)
 			}
 		}
 	}
 
-	res, err := options.Provider.GenText(ctx, options.Message)
-
-	if options.Hooks != nil && len(options.Hooks.AfterGenText) > 0 {
-		for _, h := range options.Hooks.AfterGenText {
-			res, err = h.AfterGenText(ctx, res, err)
-		}
-	}
-
-	return res, err
+	return chainedHandler(ctx, options)
 }

@@ -21,20 +21,6 @@ type Choice struct {
 	FinishReason string  `json:"finish_reason"`
 }
 
-type MessageRole string
-
-const (
-	MessageRoleUser      MessageRole = "user"
-	MessageRoleAssistant MessageRole = "assistant"
-	MessageRoleSystem    MessageRole = "system"
-	MessageRoleTool      MessageRole = "tool"
-)
-
-type Message struct {
-	Role    MessageRole `json:"role"`
-	Content string      `json:"content"`
-}
-
 type Usage struct {
 	PromptTokens     int `json:"prompt_tokens"`
 	CompletionTokens int `json:"completion_tokens"`
