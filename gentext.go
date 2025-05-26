@@ -2,10 +2,12 @@ package aigo
 
 import (
 	"context"
+
+	"github.com/DeluxeOwl/aigo/provider/schema"
 )
 
 type GenTexter interface {
-	GenText(ctx context.Context, message string) (*GenTextResponse, error)
+	GenText(ctx context.Context, messages []schema.Message) (*GenTextResponse, error)
 }
 
 type GenTextResponse struct {
@@ -26,13 +28,13 @@ func (f GenTextMiddlewareFunc) Process(ctx context.Context, options *GenTextOpti
 
 type GenTextOptions struct {
 	Provider   GenTexter
-	Message    string
+	Messages   []schema.Message
 	Middleware []GenTextMiddleware `exhaustruct:"optional"`
 }
 
 func GenText(ctx context.Context, options *GenTextOptions) (*GenTextResponse, error) {
 	coreOperation := func(currentCtx context.Context, currentOpts *GenTextOptions) (*GenTextResponse, error) {
-		return currentOpts.Provider.GenText(currentCtx, currentOpts.Message)
+		return currentOpts.Provider.GenText(currentCtx, currentOpts.Messages)
 	}
 
 	chainedHandler := GenTextNextFn(coreOperation)

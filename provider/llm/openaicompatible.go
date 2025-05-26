@@ -48,14 +48,10 @@ func NewOpenAICompatibleWithConfig(model OpenAICompatibleModel, cfg *OpenAICompa
 }
 
 // TODO: errors
-func (o *OpenAICompatible) GenText(ctx context.Context, message string) (*aigo.GenTextResponse, error) {
+func (o *OpenAICompatible) GenText(ctx context.Context, messages []schema.Message) (*aigo.GenTextResponse, error) {
 	body := schema.Request{
-		Model: string(o.model),
-		Messages: []schema.Message{
-			schema.NewUserMessage([]schema.ContentPartUser{
-				schema.NewTextPart(message),
-			}),
-		},
+		Model:    string(o.model),
+		Messages: messages,
 	}
 
 	jsonb, err := json.Marshal(body)
