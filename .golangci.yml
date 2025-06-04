@@ -222,7 +222,7 @@ linters:
     tagliatelle:
       case:
         rules:
-          json: goCamel
+          json: snake
           yaml: goCamel
     usetesting:
       os-temp-dir: true
