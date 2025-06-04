@@ -10,10 +10,6 @@ type Generator interface {
 	Gen(ctx context.Context, messages []schema.Message) (*GenResponse, error)
 }
 
-type GenResponse struct {
-	Response schema.Response
-}
-
 type GenNextFn func(ctx context.Context, options *GenOptions) (*GenResponse, error)
 
 type GenMiddleware interface {

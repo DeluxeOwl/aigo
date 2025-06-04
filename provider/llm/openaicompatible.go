@@ -102,6 +102,6 @@ func (o *OpenAICompatible) Gen(ctx context.Context, messages []schema.Message) (
 	}
 
 	return &aigo.GenResponse{
-		Response: u,
+		Response: &u,
 	}, nil
 }

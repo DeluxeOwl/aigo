@@ -50,8 +50,15 @@ func TestOllama(t *testing.T) {
 				res, err := next(ctx, options)
 
 				if err == nil && res != nil {
-					// TODO: add helpers to extract text
-					// res.Text = strings.ToUpper(res.Text)
+					am, err := res.GetLastAssistantMessage()
+					if err != nil {
+						return res, err
+					}
+
+					am.RunIfText(func(message aigo.AssistantText) {
+						message.SetText(strings.ToUpper(message.Text))
+					})
+
 				}
 				return res, err
 			}),
@@ -59,5 +66,10 @@ func TestOllama(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	t.Logf("%+v\n", resp.Response)
+	am, err := resp.GetLastAssistantMessage()
+	require.NoError(t, err)
+
+	am.RunIfText(func(message aigo.AssistantText) {
+		t.Log(message.Text)
+	})
 }

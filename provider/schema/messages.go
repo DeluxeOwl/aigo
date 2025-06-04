@@ -50,7 +50,3 @@ type AssistantMessage struct {
 }
 
 func (*AssistantMessage) isMessage() {}
-
-type AnyMessage struct{}
-
-func (AnyMessage) isMessage() {}
