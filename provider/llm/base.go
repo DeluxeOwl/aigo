@@ -1,6 +1,11 @@
 package llm
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/DeluxeOwl/aigo/provider/schema"
+)
 
 type Base struct {
 	client  *http.Client
@@ -8,6 +13,12 @@ type Base struct {
 	baseURL string `exhaustruct:"optional"`
 	path    string `exhaustruct:"optional"`
 	apiKey  string `exhaustruct:"optional"`
+
+	baseOnBeforeRequestMarshal    func(req *schema.Request)  `exhaustruct:"optional"`
+	baseOnBeforeRequestBody       func(body json.RawMessage) `exhaustruct:"optional"`
+	baseOnBeforeRequestSend       func(req *http.Request)    `exhaustruct:"optional"`
+	baseOnBeforeResponseRead      func(req *http.Response)   `exhaustruct:"optional"`
+	baseOnBeforeResponseUnmarshal func(body []byte)          `exhaustruct:"optional"`
 }
 
 type BaseOption func(*Base)
@@ -33,6 +44,36 @@ func BaseURL(baseURL string) BaseOption {
 func CompletionsPath(path string) BaseOption {
 	return func(c *Base) {
 		c.path = path
+	}
+}
+
+func OnBeforeRequestMarshal(cb func(req *schema.Request)) BaseOption {
+	return func(c *Base) {
+		c.baseOnBeforeRequestMarshal = cb
+	}
+}
+
+func OnBeforeRequestBody(cb func(body json.RawMessage)) BaseOption {
+	return func(c *Base) {
+		c.baseOnBeforeRequestBody = cb
+	}
+}
+
+func OnBeforeRequestSend(cb func(*http.Request)) BaseOption {
+	return func(c *Base) {
+		c.baseOnBeforeRequestSend = cb
+	}
+}
+
+func OnBeforeResponseRead(cb func(*http.Response)) BaseOption {
+	return func(c *Base) {
+		c.baseOnBeforeResponseRead = cb
+	}
+}
+
+func OnBeforeResponseUnmarshal(cb func(body []byte)) BaseOption {
+	return func(c *Base) {
+		c.baseOnBeforeResponseUnmarshal = cb
 	}
 }
 

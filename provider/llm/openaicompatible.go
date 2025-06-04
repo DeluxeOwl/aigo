@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -48,54 +47,61 @@ func NewOpenAICompatibleWithConfig(model OpenAICompatibleModel, cfg *OpenAICompa
 }
 
 // TODO: errors
-func (o *OpenAICompatible) GenText(ctx context.Context, messages []schema.Message) (*aigo.GenTextResponse, error) {
+func (o *OpenAICompatible) Gen(ctx context.Context, messages []schema.Message) (*aigo.GenResponse, error) {
 	body := schema.Request{
 		Model:    string(o.model),
 		Messages: messages,
 	}
 
+	if o.baseOnBeforeRequestMarshal != nil {
+		o.baseOnBeforeRequestMarshal(&body)
+	}
+
 	jsonb, err := json.Marshal(body)
 	if err != nil {
-		return nil, fmt.Errorf("gen text: %w", err)
+		return nil, fmt.Errorf("gen: %w", err)
+	}
+
+	if o.baseOnBeforeRequestBody != nil {
+		o.baseOnBeforeRequestBody(jsonb)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, o.url, bytes.NewBuffer(jsonb))
 	if err != nil {
-		return nil, fmt.Errorf("gen text: %w", err)
+		return nil, fmt.Errorf("gen: %w", err)
+	}
+
+	if o.baseOnBeforeRequestSend != nil {
+		o.baseOnBeforeRequestSend(req)
 	}
 
 	resp, err := o.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("gen text: %w", err)
+		return nil, fmt.Errorf("gen: %w", err)
 	}
 	defer resp.Body.Close()
 
+	if o.baseOnBeforeResponseRead != nil {
+		o.baseOnBeforeResponseRead(resp)
+	}
+
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("gen text: %w", err)
+		return nil, fmt.Errorf("gen: %w", err)
+	}
+
+	// TODO: unmarshal into a custom struct and stop? Return it as a method on GenResponse?
+	if o.baseOnBeforeResponseUnmarshal != nil {
+		o.baseOnBeforeResponseUnmarshal(b)
 	}
 
 	var u schema.Response
 	err = json.Unmarshal(b, &u)
 	if err != nil {
-		return nil, fmt.Errorf("gen text: %w", err)
+		return nil, fmt.Errorf("gen: %w", err)
 	}
 
-	if len(u.Choices) == 0 {
-		return nil, errors.New("gen text: empty response: " + u.Detail)
-	}
-
-	assistantMessage, ok := u.Choices[0].Message.(*schema.AssistantMessage)
-	if !ok {
-		return nil, errors.New("gen text: missing assistant message")
-	}
-
-	text, ok := assistantMessage.Content.(schema.StringPart)
-	if !ok {
-		return nil, errors.New("gen text: missing assistant string")
-	}
-
-	return &aigo.GenTextResponse{
-		Text: text.String(),
+	return &aigo.GenResponse{
+		Response: u,
 	}, nil
 }
