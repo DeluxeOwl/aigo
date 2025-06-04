@@ -21,10 +21,10 @@ linters:
     - exhaustruct
     - exptostd
     - fatcontext
-    # - forbidigo
+    - forbidigo
     - funlen
     - gocheckcompilerdirectives
-    - gochecknoglobals
+    # - gochecknoglobals
     - gochecknoinits
     - gochecksumtype
     - gocognit
@@ -40,7 +40,7 @@ linters:
     - ineffassign
     - interfacebloat
     - intrange
-    - ireturn
+    # - ireturn
     - loggercheck
     - makezero
     - mirror
@@ -82,6 +82,10 @@ linters:
     - wastedassign
     - whitespace
   settings:
+    revive:
+      rules:
+        - name: exported
+          disabled: true
     cyclop:
       max-complexity: 30
       package-average: 10
@@ -218,7 +222,7 @@ linters:
     tagliatelle:
       case:
         rules:
-          json: snake
+          json: goCamel
           yaml: goCamel
     usetesting:
       os-temp-dir: true
