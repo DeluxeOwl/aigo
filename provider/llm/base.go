@@ -7,6 +7,7 @@ import (
 	"github.com/DeluxeOwl/aigo/provider/schema"
 )
 
+// TODO: sealed interface so it must be embedded
 type Base struct {
 	client  *http.Client
 	url     string `exhaustruct:"optional"`
