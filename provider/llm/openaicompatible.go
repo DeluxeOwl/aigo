@@ -47,6 +47,7 @@ func NewOpenAICompatibleWithConfig(model OpenAICompatibleModel, cfg *OpenAICompa
 }
 
 // TODO: errors
+// TODO: generic method for raw request? not here though
 func (o *OpenAICompatible) Gen(ctx context.Context, messages []schema.Message) (*aigo.GenResponse, error) {
 	body := schema.Request{
 		Model:    string(o.model),
